@@ -194,10 +194,16 @@ class Connection(object):
                 [self._id]
 
     def get_role(self, player=None):
+        # If no player is specified,
+        # look up the client's own role
         if player == None:
             player = self._id
 
-        if self.offline:
+        # If no roles have been specified,
+        # return 'None' in any case.
+        if self.roles == None
+            return None
+        elif self.offline:
             return self.roles[1]
         else:
             return self.get(self.session)['roles']\
