@@ -217,18 +217,28 @@ class Connection(object):
     @property
     def current_partner_roles(self):
         if self.offline:
+            # In the offline mode, the client is partnered
+            # with itself, so the following will return a
+            # dictionary containing the client's own id,
+            # followed by the first role specified.
             return dict(zip(
                 self.current_partners,
                 self.roles[1,]
             ))
         else:
+            # In the online mode, with full access to other clients,
+            # return a dictionary of ids mapping to roles
+            # for each of the current partners.
             return {
                 partner: get_role(partner)
                 for partner in self.current_partners
             }
 
     def reassign_grouping(self):
+        # Switch to the next grouping available, and
+        # return the currently assigned partners.
         if self.offline:
+            # Mappings never switch in offline mode
             return self.current_partners
         else:
             self.current_grouping += 1
