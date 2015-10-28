@@ -126,6 +126,8 @@ class Connection(object):
         check_type = 'client' if check == 'clients' else check
 
         if self.offline:
+            # Do not wait in offline mode, but return
+            # directly instead.
             return
         else:
             # TODO: Check only a couple of documents,
@@ -133,6 +135,12 @@ class Connection(object):
             # only
             last_seq = self.db.resource.get()[1]['update_seq']
 
+            # Prepopulate a dictionary of the relevant
+            # documents' ids onto whether the specified
+            # condition is met.
+            # This process works slightly differently
+            # depending on which documents are checked,
+            # but the end result is always the same.
             if check is 'session':
                 condition_met = {self.session: condition(self.db.get(self.session))}
             elif check is 'partners':
@@ -147,8 +155,13 @@ class Connection(object):
                         key=self.session, type='client', include_docs='true')}
 
             if check_function(condition_met.values()):
+                # If all relevant documents test positive
+                # at this point, stop waiting.
                 return
             else:
+                # Otherwise keep going, listening for changes
+                # to the database and updating the dictionary
+                # accordingly.
                 while True:
                     r = self.db.resource.get(
                         '_changes',
