@@ -214,7 +214,7 @@ class Connection(object):
 
         # If no roles have been specified,
         # return 'None' in any case.
-        if self.roles == None
+        if self.roles == None:
             return None
         elif self.offline:
             return self.roles[1]
