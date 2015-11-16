@@ -22,7 +22,7 @@ import random
 class Connection(object):
     def __init__(self, server_uri, db_name,
         client_name=None, design='stranger',
-        group_size=2, groupings_needed=1, roles=None,
+        group_size=2, groupings_needed=1, roles=None, ghosts=False,
         group='default', initial_data={}, offline=False):
         # Set offline mode
         self.offline = offline
@@ -47,6 +47,7 @@ class Connection(object):
                 'group_size': group_size,
                 'groupings_needed': groupings_needed,
                 'roles': roles,
+                'ghosts': ghosts,
                 }
             }
 
