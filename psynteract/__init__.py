@@ -258,9 +258,9 @@ class Connection(object):
         else:
             self.current_grouping += 1
 
-            # If rollovers are enabled, start from the
+            # If rollovers are permitted, start from the
             # first grouping if the available groupings have
-            # been exceeded already.
+            # already been exceeded.
             if allow_rollover:
                 self.current_grouping = self.current_grouping % self.groupings
 
