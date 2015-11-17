@@ -53,6 +53,7 @@ class Connection(object):
 
         self.design = design
         self.group_size = group_size
+        self.groupings = groupings_needed
         self.roles = roles
 
         # Start with the first grouping
@@ -248,7 +249,7 @@ class Connection(object):
                 for partner in self.current_partners
             }
 
-    def reassign_grouping(self):
+    def reassign_grouping(self, allow_rollover=False):
         # Switch to the next grouping available, and
         # return the currently assigned partners.
         if self.offline:
@@ -256,6 +257,13 @@ class Connection(object):
             return self.current_partners
         else:
             self.current_grouping += 1
+
+            # If rollovers are enabled, start from the
+            # first grouping if the available groupings have
+            # been exceeded already.
+            if allow_rollover:
+                self.current_grouping = self.current_grouping % self.groupings
+
             return self.current_partners
 
 def install(db_uri, create_db=True):
