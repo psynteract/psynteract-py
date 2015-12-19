@@ -51,10 +51,21 @@ class Connection(object):
                 }
             }
 
+        if offline:
+            self.doc['_id'] = 'offline'
+
         self.design = design
         self.group_size = group_size
         self.groupings = groupings_needed
         self.roles = roles
+
+        # Show warning if roles are used in offline mode
+        if offline and roles:
+            print('Warning: You are using roles in offline mode. '
+                'This is tricky and may lead to complications. '
+                'To be on the safe side, we recommend simulating. '
+                'a complete lab environment or using dummies (if '
+                'you are using code to build the experiment).')
 
         # Start with the first grouping
         self.current_grouping = 0
