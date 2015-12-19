@@ -3,7 +3,7 @@
 __Real-time interactive experiments for the behavioral sciences, using Python.__
 
 This package allows researchers to build real-time interactive experiments in pure Python. If you are using [PsychoPy](http://www.psychopy.org), [expyriment](http://www.expyriment.org/) or a similar package to build your studies, this is for you.<br>
-If you would like to get started as quickly as possible, please download the [latest release](https://github.com/FelixHenninger/psynteract-py/releases) and add the psynteract directory to your project folder.
+If you would like to get started as quickly as possible, please download the [latest release](https://github.com/psynteract/psynteract-py/releases) and add the psynteract directory to your project folder.
 
 Finally, just to be sure, please note that a [graphical interface for OpenSesame](https://github.com/felixhenninger/psynteract-os) is also available.
 
