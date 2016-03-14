@@ -35,25 +35,22 @@ setup(
     author='Felix Henninger & Pascal Kieslich',
     author_email='mailbox@felixhenninger.com',
 
-    # Choose your license
+    # License
     license='Apache 2.0',
 
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
-        # How mature is this project? Common values are
-        #   3 - Alpha
-        #   4 - Beta
+        # Some day this will change to
         #   5 - Production/Stable
         'Development Status :: 4 - Beta',
 
-        # Indicate who your project is intended for
+        # Audience
         'Intended Audience :: Developers',
 
-        # Pick your license as you wish (should match "license" above)
-        'License :: OSI Approved :: Apache 2.0',
+        # License
+        'License :: OSI Approved :: Apache Software License',
 
-        # Specify the Python versions you support here. In particular, ensure
-        # that you indicate whether you support Python 2, Python 3 or both.
+        # Python version support
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
@@ -62,9 +59,9 @@ setup(
         'Programming Language :: Python :: 3.5',
     ],
 
-    # List run-time dependencies here.  These will be installed by pip when
-    # your project is installed. For an analysis of "install_requires" vs pip's
-    # requirements files see:
-    # https://packaging.python.org/en/latest/requirements.html
+    # Files to include in package
+    packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
+
+    # Run-time dependencies
     install_requires=['requests', 'pycouchdb'],
 )
