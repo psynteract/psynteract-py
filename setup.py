@@ -18,7 +18,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='Psynteract',
+    name='psynteract',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
@@ -59,9 +59,13 @@ setup(
         'Programming Language :: Python :: 3.5',
     ],
 
+    package_dir = {'psynteract': 'psynteract'},
+
     # Files to include in package
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
 
     # Run-time dependencies
     install_requires=['requests', 'pycouchdb'],
+
+    zip_safe=False,
 )
