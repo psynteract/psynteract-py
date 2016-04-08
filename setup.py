@@ -61,6 +61,10 @@ setup(
 
     package_dir = {'psynteract': 'psynteract'},
 
+    package_data={
+        'psynteract': ['backend.json'],
+    },
+
     # Files to include in package
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
 
