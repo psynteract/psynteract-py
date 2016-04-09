@@ -134,7 +134,7 @@ class Connection(object):
 
     def wait(self, condition=lambda doc: True,
         check='clients', check_function=all,
-        timeout=None, heartbeat=1000):
+        timeout=None, heartbeat=60000):
 
         check_type = 'client' if check == 'clients' else check
 
