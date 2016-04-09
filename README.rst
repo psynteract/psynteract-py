@@ -56,5 +56,3 @@ libraries:
   <http://www.kennethreitz.org/>`__
 * `PyCouchDB <https://github.com/histrio/py-couchdb>`__ by `Rinat Sabitov
   <https://github.com/histrio>`__
-
-Both are bundled in the release packages.

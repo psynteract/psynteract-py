@@ -132,7 +132,7 @@ class Connection(object):
             else:
                 return self.doc
 
-    def await(self, condition=lambda doc: True,
+    def wait(self, condition=lambda doc: True,
         check='clients', check_function=all,
         timeout=None, heartbeat=1000):
 
@@ -204,6 +204,15 @@ class Connection(object):
                                     return
                             else:
                                 last_seq = change['last_seq']
+
+    def await(self, *args, **kwargs):
+        import warnings
+        warnings.warn(
+            "Connection.await is deprecated and will be removed in the future." +
+            "Please use the equivalent .wait() method instead",
+            DeprecationWarning
+            )
+        return self.wait(*args, **kwargs)
 
     def heartbeat(self):
         pass
