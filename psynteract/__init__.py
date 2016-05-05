@@ -92,7 +92,43 @@ class Connection(object):
 
     def push(self):
         if not self.offline:
-            self.doc = self.db.save(self.doc)
+            # Compute the URL of the update handler,
+            # leaving out the document id if it is
+            # not yet set.
+            update_url = '_design/psynteract/_update/add_timestamp/{}'.format(
+                '' if self._id is None else self._id
+            )
+
+            # Perform a put request to the update handler,
+            # sending the new document data.
+            # (note that this bypasses the db abstraction layer)
+            response, result = self.db.resource.put(
+                update_url,
+                data=json.dumps(self.doc)
+                )
+
+            # One difficulty at this point is that some of the
+            # data are updated on the server. Specifically,
+            # the update handler adds a timestamp that reflects
+            # the current server time. In addition, the document
+            # id is generated when the document is first saved,
+            # and the revision hash is computed anew after each
+            # save. These need to be represented locally so that
+            # the document can be updated (put requests always
+            # need to send along the last revision id, and need
+            # the document id as a destination).
+            # At the moment, these data are extracted from http
+            # headers. We might at some point parse the response
+            # so that the timestamp is reflected in the local data,
+            # but I have decided against that for now.
+
+            # Update document id if not previously generated
+            if self._id is None:
+                self.doc['_id'] = response.headers['X-Couch-Id']
+
+            # Update document revision hash
+            self.doc['_rev'] = response.headers['X-Couch-Update-NewRev']
+
         else:
             pass
 
