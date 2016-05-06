@@ -203,9 +203,16 @@ class Connection(object):
                 return self.doc
 
     def wait(self, condition=lambda doc: True,
-        check='clients', check_function=all,
-        timeout=None, heartbeat=60000):
+        check='clients', aggregation_function=all,
+        timeout=None, heartbeat=60):
 
+        # Store current replacement state
+        replacements = self.replacements
+
+        # Define the type of documents to check during
+        # updating (the type of each individual client
+        # doc is set to 'client', but the check argument
+        # value in this case is 'clients')
         check_type = 'client' if check == 'clients' else check
 
         if self.offline:
@@ -213,9 +220,8 @@ class Connection(object):
             # directly instead.
             return
         else:
-            # TODO: Check only a couple of documents,
-            # e.g. not the client's own, allies/session
-            # only
+            # Remember the latest state with regard to the database
+            # (we will later check only updates from hereon)
             last_seq = self.db.resource.get()[1]['update_seq']
 
             # Prepopulate a dictionary of the relevant
@@ -225,19 +231,32 @@ class Connection(object):
             # depending on which documents are checked,
             # but the end result is always the same.
             if check is 'session':
-                condition_met = {self.session: condition(self.db.get(self.session))}
-            elif check is 'partners':
-                # FIXME: Test this!
-                condition_met = {doc['id']: condition(doc['doc'])
-                    for doc in self.db.query('psynteract/session_clients', \
-                        key=self.session, type='client', include_docs='true')
-                        if doc['id'] in self.current_partners}
+                condition_met = {
+                    self.session: condition(self.db.get(self.session))
+                }
             else:
-                condition_met = {doc['id']: condition(doc['doc'])
+                client_data = { doc['id']: doc['doc']
                     for doc in self.db.query('psynteract/session_clients', \
-                        key=self.session, type='client', include_docs='true')}
+                        key=self.session, type='client', include_docs='true') }
 
-            if check_function(condition_met.values()):
+                condition_met = {}
+                for _id, doc in client_data.items():
+                    # If the current document has not been replaced,
+                    # check it directly. Otherwise, apply the condition
+                    # function to the document's replacement
+                    if not _id in replacements.keys():
+                        condition_met[_id] = condition(doc)
+                    else:
+                        condition_met[_id] = condition(
+                            client_data[indirect_lookup(replacements, _id)]
+                        )
+
+                # If checking group members only, limit dictionary
+                if check is 'partners':
+                    condition_met = {k: v for k, v in condition_met.items()\
+                        if k in self.current_partners}
+
+            if aggregation_function(condition_met.values()):
                 # If all relevant documents test positive
                 # at this point, stop waiting.
                 return
@@ -256,23 +275,53 @@ class Connection(object):
                             'type': check_type,
                             'since': last_seq,
                             'include_docs': 'true',
-                            'heartbeat': heartbeat,
+                            'heartbeat': heartbeat * 60,
                             'timeout': timeout
                         },
                         stream=True,
-                        timeout=timeout/1000 if not timeout is None else None
+                        timeout=timeout if not timeout is None else None
                     )
 
                     for line in r[0].iter_lines(chunk_size=1):
                         if line: # filter out keep-alive new lines
                             change = json.loads(line.decode("utf-8"))
                             if not 'last_seq' in change.keys():
+                                # An actual document update has been
+                                # posted, handle it.
+
+                                # First, note that the local state is a more
+                                # recent copy of the database
                                 last_seq = change['seq']
-                                condition_met[change['id']] = \
-                                    condition(change['doc'])
-                                if check_function(condition_met.values()):
+
+                                # Update the condition state
+                                # (only if the document is actually relevant)
+                                if change['id'] in condition_met.keys():
+                                    # Update state directly
+                                    condition_met[change['id']] = \
+                                        condition(change['doc'])
+                                elif change['id'] in replacements.values():
+                                    # Search for the documents that any given
+                                    # update updates, and update their state
+                                    for k, v in replacements:
+                                        if k in condition_met.keys() and\
+                                            change['id'] == v:
+                                            condition_met[k] = \
+                                                condition(change['doc'])
+
+                                # TODO: Potentially compute a set of relevant
+                                # docs for replacements or invert replacement
+                                # dictionary to reduce computation in the
+                                # second branch above. (it should be taken
+                                # relatively infrequently, so the practical
+                                # effect should be minimal)
+
+                                # Stop waiting if the condition is met
+                                # for all monitored clients
+                                if aggregation_function(condition_met.values()):
                                     return
                             else:
+                                # This does not seem to have been
+                                # a substantive document
                                 last_seq = change['last_seq']
 
     def await(self, *args, **kwargs):
