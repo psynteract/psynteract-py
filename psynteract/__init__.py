@@ -19,9 +19,32 @@ import pycouchdb
 import json
 import random
 
+# Define a function required later
+def indirect_lookup(d, key, max_iterations=10):
+    """
+    Perform a lookup of a *key* in a dictionary *d*,
+    but also check if there is a key corresponding to
+    the retrieved value, and, if so, return the
+    value associated with this key (and so on,
+    creating a chain of lookups)
+    """
+    # A recursive solution would probably also be
+    # possible here.
+    a = key
+    for i in range(max_iterations):
+        b = d[a]
+        if b in d.keys():
+            a = b
+        else:
+            return b
+
+    raise RuntimeError('Maximum search depth exceeded, '
+      'check for circular replacements')
+
 class Connection(object):
     def __init__(self, server_uri, db_name,
         client_name=None, design='stranger',
+        replacements=True,
         group_size=2, groupings_needed=1, roles=None, ghosts=False,
         group='default', initial_data={}, offline=False):
         # Set offline mode
@@ -48,6 +71,7 @@ class Connection(object):
                 'groupings_needed': groupings_needed,
                 'roles': roles,
                 'ghosts': ghosts,
+                'replacements': replacements,
                 }
             }
 
@@ -58,6 +82,7 @@ class Connection(object):
         self.group_size = group_size
         self.groupings = groupings_needed
         self.roles = roles
+        self.use_replacements = replacements
 
         # Show warning if roles are used in offline mode
         if offline and roles:
@@ -156,10 +181,19 @@ class Connection(object):
         except KeyError:
             return None
 
-    def get(self, doc, offline_dummy=[]):
+    def get(self, doc, offline_dummy=[], check_replacements=True):
         if not self.offline:
-            return self.db.get(doc)
+            if check_replacements:
+                # Lookup replacement documents
+                replacements = self.replacements
+                path = doc if doc not in replacements else replacements[doc]
+            else:
+                path = doc
+
+            # Return the final path
+            return self.db.get(path)
         else:
+            # Offline mode handling
             import collections
             if isinstance(offline_dummy, dict):
                 return offline_dummy
@@ -321,6 +355,21 @@ class Connection(object):
                 self.current_grouping = self.current_grouping % self.groupings
 
             return self.current_partners
+
+    @property
+    def replacements(self):
+        if self.offline or not self.use_replacements:
+            # No replacements in this case
+            return {}
+        else:
+            # We won't check replacements here
+            # to avoid infinite recursion
+            r = self.get(self.session, check_replacements=False)['replace']
+
+            # Remove indirect replacements
+            r = {k: indirect_lookup(r, k) for k, v in r.items()}
+
+            return r
 
 def install(db_uri, create_db=True):
     import os
