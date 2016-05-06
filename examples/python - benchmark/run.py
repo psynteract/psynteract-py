@@ -35,6 +35,9 @@ def sync(cycle_length):
 # Wait for the session to start
 c.wait(lambda session: session['status'] == 'running', check='session')
 
+# Output debug info
+print('This is client', c._id, 'my role is', c.current_role)
+
 # Use the function above to sync up the clients
 sync(cycle_length)
 
@@ -65,7 +68,9 @@ for i in range(cycles):
     t2 = datetime.now()
 
     # Output round and timestamp
-    print('{:4} {}'.format(i,  round((t2 - t1).total_seconds(), 3)))
+    print('Lag: {:4} {}'.format(
+        i, round((t2 - t1).total_seconds() - slacker_sleep_s, 3)
+    ))
 
     # The cycle is now over, sync up the time before starting the next
     sync(cycle_length)
