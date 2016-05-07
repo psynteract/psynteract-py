@@ -275,8 +275,8 @@ class Connection(object):
                             'include_session': self.use_replacements,
                             'since': last_seq,
                             'include_docs': 'true',
-                            'heartbeat': heartbeat * 60,
-                            'timeout': timeout
+                            'heartbeat': heartbeat * 1000,
+                            'timeout': timeout * 1000 if not timeout is None else None
                         },
                         stream=True,
                         timeout=timeout if not timeout is None else None
