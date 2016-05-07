@@ -270,9 +270,9 @@ class Connection(object):
                         params={
                             'feed': 'continuous',
                             'filter': 'psynteract/clients',
-                            # 'key': '"' + self.session + '"',
                             'session': self.session,
                             'type': check_type,
+                            'include_session': self.use_replacements,
                             'since': last_seq,
                             'include_docs': 'true',
                             'heartbeat': heartbeat * 60,
@@ -314,6 +314,23 @@ class Connection(object):
                                 # second branch above. (it should be taken
                                 # relatively infrequently, so the practical
                                 # effect should be minimal)
+
+                                # If a session change comes in, replacements
+                                # might potentially have changed. In this case,
+                                # we need to re-check all replaced docs
+                                if change['doc']['type'] == 'session':
+                                    # Update state of replacements
+                                    replacements = change['doc']['replace']
+
+                                    # Load and re-check all replaced documents
+                                    for replaced_doc in replacements.keys():
+                                        # Only check documents that are being
+                                        # monitored anyway
+                                        if replaced_doc in condition_met.keys():
+                                            condition_met[replaced_doc] =\
+                                                condition(self.get(
+                                                    replacements[replaced_doc]
+                                                ))
 
                                 # Stop waiting if the condition is met
                                 # for all monitored clients
