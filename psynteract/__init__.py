@@ -1,11 +1,11 @@
 # Copyright 2015- Felix Henninger
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -134,7 +134,7 @@ class Connection(object):
 
             # One difficulty at this point is that some of the
             # data are updated on the server. Specifically,
-            # the update handler adds a timestamp that reflects
+            # the update handler adds a timestamp that reflects
             # the current server time. In addition, the document
             # id is generated when the document is first saved,
             # and the revision hash is computed anew after each
@@ -144,7 +144,7 @@ class Connection(object):
             # the document id as a destination).
             # At the moment, these data are extracted from http
             # headers. We might at some point parse the response
-            # so that the timestamp is reflected in the local data,
+            # so that the timestamp is reflected in the local data,
             # but I have decided against that for now.
 
             # Update document id if not previously generated
@@ -220,7 +220,7 @@ class Connection(object):
             # directly instead.
             return
         else:
-            # Remember the latest state with regard to the database
+            # Remember the latest state with regard to the database
             # (we will later check only updates from hereon)
             last_seq = self.db.resource.get()[1]['update_seq']
 
@@ -301,7 +301,7 @@ class Connection(object):
                                         condition(change['doc'])
                                 elif change['id'] in replacements.values():
                                     # Search for the documents that any given
-                                    # update updates, and update their state
+                                    # update updates, and update their state
                                     for k, v in replacements:
                                         if k in condition_met.keys() and\
                                             change['id'] == v:
@@ -309,23 +309,23 @@ class Connection(object):
                                                 condition(change['doc'])
 
                                 # TODO: Potentially compute a set of relevant
-                                # docs for replacements or invert replacement
+                                # docs for replacements or invert replacement
                                 # dictionary to reduce computation in the
                                 # second branch above. (it should be taken
-                                # relatively infrequently, so the practical
+                                # relatively infrequently, so the practical
                                 # effect should be minimal)
 
-                                # If a session change comes in, replacements
-                                # might potentially have changed. In this case,
-                                # we need to re-check all replaced docs
+                                # If a session change comes in, replacements
+                                # might potentially have changed. In this case,
+                                # we need to re-check all replaced docs
                                 if change['doc']['type'] == 'session':
-                                    # Update state of replacements
+                                    # Update state of replacements
                                     replacements = change['doc']['replace']
 
                                     # Load and re-check all replaced documents
                                     for replaced_doc in replacements.keys():
-                                        # Only check documents that are being
-                                        # monitored anyway
+                                        # Only check documents that are being
+                                        # monitored anyway
                                         if replaced_doc in condition_met.keys():
                                             condition_met[replaced_doc] =\
                                                 condition(self.get(
