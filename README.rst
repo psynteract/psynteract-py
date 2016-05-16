@@ -32,7 +32,7 @@ Installation
 The package can be installed locally via the ``pip`` command, specifying the
 latest release URL, such as::
 
-    pip install https://github.com/psynteract/psynteract-py/releases/download/v0.6.1/psynteract-0.6.1.tar.gz
+    pip install https://github.com/psynteract/psynteract-py/releases/download/v0.7.0/psynteract-0.7.0.tar.gz
 
 The psynteract library should then be available within the local python
 installation.
