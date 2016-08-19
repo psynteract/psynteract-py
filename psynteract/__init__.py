@@ -42,13 +42,19 @@ def indirect_lookup(d, key, max_iterations=10):
       'check for circular replacements')
 
 class Connection(object):
-    def __init__(self, server_uri, db_name,
+    def __init__(self,
+        server_uri='http://server.example:5984', db_name='psynteract',
         client_name=None, design='stranger',
         replacements=True,
         group_size=2, groupings_needed=1, roles=None, ghosts=False,
         group='default', initial_data={}, offline=False):
         # Set offline mode
         self.offline = offline
+
+        if server_uri == 'http://server.example:5984' and not self.offline:
+            print('You are trying to connect to a server, but have not yet '
+                'replaced the default URL. Please specify the url of your '
+                'server or use the offline mode for the time being.')
 
         if not self.offline:
             self.server = pycouchdb.Server(server_uri)
@@ -375,7 +381,12 @@ class Connection(object):
         if self.roles == None:
             return None
         elif self.offline:
-            return self.roles[1]
+            # In offline mode, choose a role at random
+            print('You are in offline mode, in which you only interact with '
+                'yourself, but have specified multiple roles for the players. '
+                'This might lead to problems, please check the documentation '
+                'for methods of circumventing them.')
+            return random.sample(self.roles, 1)[0]
         else:
             return self.get(self.session)['roles']\
                 [self.current_grouping]\
