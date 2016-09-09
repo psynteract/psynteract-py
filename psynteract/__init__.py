@@ -219,7 +219,7 @@ class Connection(object):
         # updating (the type of each individual client
         # doc is set to 'client', but the check argument
         # value in this case is 'clients')
-        check_type = 'client' if check == 'clients' else check
+        check_doc_type = 'session' if check == 'session' else 'client'
 
         if self.offline:
             # Do not wait in offline mode, but return
@@ -257,7 +257,7 @@ class Connection(object):
                             client_data[indirect_lookup(replacements, _id)]
                         )
 
-                # If checking group members only, limit dictionary
+                # If checking group members only, filter dictionary
                 if check is 'partners':
                     condition_met = {k: v for k, v in condition_met.items()\
                         if k in self.current_partners}
@@ -277,7 +277,7 @@ class Connection(object):
                             'feed': 'continuous',
                             'filter': 'psynteract/clients',
                             'session': self.session,
-                            'type': check_type,
+                            'type': check_doc_type,
                             'include_session': self.use_replacements,
                             'since': last_seq,
                             'include_docs': 'true',
