@@ -347,15 +347,6 @@ class Connection(object):
                                 # a substantive document
                                 last_seq = change['last_seq']
 
-    def await(self, *args, **kwargs):
-        import warnings
-        warnings.warn(
-            "Connection.await is deprecated and will be removed in the future." +
-            "Please use the equivalent .wait() method instead",
-            DeprecationWarning
-            )
-        return self.wait(*args, **kwargs)
-
     def heartbeat(self):
         pass
 
